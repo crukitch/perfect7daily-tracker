@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect7Daily Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-b-3xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-2">Perfect7Daily Tracker</h1>
+            <p class="text-green-100 text-center text-sm">Your Cruciferous Kitchen Journey</p>
+            
+            <!-- Date Selector -->
+            <div class="mt-4">
+                <input
+                    type="date"
+                    id="currentDate"
+                    class="w-full p-3 rounded-xl text-gray-800 font-medium"
+                />
+            </div>
+
+            <!-- Progress Circle -->
+            <div class="flex justify-center mt-4">
+                <div class="relative w-20 h-20">
+                    <svg class="w-20 h-20 transform -rotate-90">
+                        <circle
+                            cx="40"
+                            cy="40"
+                            r="30"
+                            stroke="rgba(255,255,255,0.3)"
+                            stroke-width="6"
+                            fill="none"
+                        />
+                        <circle
+                            id="progressCircle"
+                            cx="40"
+                            cy="40"
+                            r="30"
+                            stroke="white"
+                            stroke-width="6"
+                            fill="none"
+                            stroke-dasharray="188.5"
+                            stroke-dashoffset="188.5"
+                            class="transition-all duration-500"
+                        />
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span id="progressText" class="text-white font-bold text-lg">0/7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="p-4 space-y-6">
+            
+            <!-- Quick Add Buttons -->
+            <div class="bg-green-50 p-4 rounded-2xl">
+                <h3 class="font-bold text-green-800 mb-3">Quick Add Salad 🥗</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button
+                        onclick="quickAddSalad('before')"
+                        class="bg-green-600 text-white p-2 rounded-xl text-sm font-medium hover:bg-green-700 transition-colors"
+                    >
+                        Before Meal
+                    </button>
+                    <button
+                        onclick="quickAddSalad('after')"
+                        class="bg-green-500 text-white p-2 rounded-xl text-sm font-medium hover:bg-green-600 transition-colors"
+                    >
+                        After Meal
+                    </button>
+                    <button
+                        onclick="addNighttimeSalad()"
+                        class="bg-green-700 text-white p-2 rounded-xl text-sm font-medium hover:bg-green-800 transition-colors col-span-2"
+                    >
+                        🌙 Nighttime Salad
+                    </button>
+                </div>
+            </div>
+
+            <!-- Detailed Meal Tracking -->
+            <div class="bg-gray-50 p-4 rounded-2xl">
+                <h3 class="font-bold text-gray-800 mb-3">📅 Detailed Tracking</h3>
+                <div id="mealTracking" class="space-y-2">
+                    <!-- Meals will be populated by JavaScript -->
+                </div>
+                
+                <!-- Nighttime Salad -->
+                <div class="flex items-center justify-between py-2 mt-4 bg-green-100 rounded-xl px-3">
+                    <span class="text-sm font-bold text-green-800">🌙 Nighttime Salad</span>
+                    <div class="flex items-center space-x-1">
+                        <button
+                            onclick="updateSalad('nighttime', -1)"
+                            class="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs hover:bg-red-200"
+                        >
+                            -
+                        </button>
+                        <span id="nighttime-count" class="w-8 text-center text-sm font-bold text-green-700">0</span>
+                        <button
+                            onclick="updateSalad('nighttime', 1)"
+                            class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs hover:bg-green-200"
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pain Level Tracking -->
+            <div class="bg-blue-50 p-4 rounded-2xl">
+                <h3 class="font-bold text-blue-800 mb-3">💪 Pain Level Today</h3>
+                <div class="space-y-3">
+                    <input
+                        type="range"
+                        id="painLevel"
+                        min="1"
+                        max="10"
+                        value="5"
+                        onchange="updatePainLevel(this.value)"
+                        class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div class="flex justify-between text-xs text-blue-600">
+                        <span>1 - No Pain</span>
+                        <span id="painLevelText" class="font-bold">Level: 5</span>
+                        <span>10 - Severe</span>
+                    </div>
+                    
+                    <!-- Pain Level Descriptions -->
+                    <div id="painDescription" class="text-sm text-blue-700 bg-white p-3 rounded-xl">
+                        🔥 Level 2: Deeper/burning pain - 2 cup salads
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="bg-yellow-50 p-4 rounded-2xl">
+                <h3 class="font-bold text-yellow-800 mb-3">📝 Daily Notes</h3>
+                <textarea
+                    id="dailyNotes"
+                    placeholder="How did you feel today? Any insights about your body's signals?"
+                    class="w-full p-3 border border-yellow-200 rounded-xl text-sm resize-none h-20"
+                ></textarea>
+            </div>
+
+            <!-- Save Button -->
+            <button
+                onclick="saveDailyData()"
+                class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+                💾 Save Today's Progress
+            </button>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden bg-green-100 border-2 border-green-500 p-4 rounded-2xl text-center">
+                <div class="text-2xl mb-2">🎉</div>
+                <p class="font-bold text-green-800">Perfect7Daily COMPLETE!</p>
+                <p class="text-green-600 text-sm">Your body is choosing healing tonight! 💚</p>
+            </div>
+
+            <!-- Motivational Footer -->
+            <div class="text-center p-4 bg-gradient-to-r from-green-100 to-green-200 rounded-2xl">
+                <p class="text-green-800 font-medium text-sm">
+                    "Every salad tells your body: Choose healing over inflammation"
+                </p>
+                <p class="text-green-600 text-xs mt-1">- Your Cruciferous Kitchen Journey</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let dailyData = {};
+        let currentDate = new Date().toISOString().split('T')[0];
+        
+        // Meal definitions
+        const meals = [
+            { key: 'breakfast', label: '🌅 Breakfast', before: 'breakfast_before', after: 'breakfast_after' },
+            { key: 'morning_snack', label: '☕ Morning Snack', before: 'morning_snack_before', after: 'morning_snack_after' },
+            { key: 'lunch', label: '🥗 Lunch', before: 'lunch_before', after: 'lunch_after' },
+            { key: 'afternoon_snack', label: '🍎 Afternoon Snack', before: 'afternoon_snack_before', after: 'afternoon_snack_after' },
+            { key: 'dinner', label: '🍽️ Dinner', before: 'dinner_before', after: 'dinner_after' },
+            { key: 'evening_snack', label: '🌙 Evening Snack', before: 'evening_snack_before', after: 'evening_snack_after' }
+        ];
+
+        // Initialize app
+        function initApp() {
+            document.getElementById('currentDate').value = currentDate;
+            initializeDayData();
+            renderMealTracking();
+            updateDisplay();
+        }
+
+        // Initialize day data
+        function initializeDayData() {
+            if (!dailyData[currentDate]) {
+                dailyData[currentDate] = {
+                    salads: {
+                        breakfast_before: 0, breakfast_after: 0,
+                        morning_snack_before: 0, morning_snack_after: 0,
+                        lunch_before: 0, lunch_after: 0,
+                        afternoon_snack_before: 0, afternoon_snack_after: 0,
+                        dinner_before: 0, dinner_after: 0,
+                        evening_snack_before: 0, evening_snack_after: 0,
+                        nighttime: 0
+                    },
+                    painLevel: 5,
+                    notes: ''
+                };
+            }
+        }
+
+        // Render meal tracking
+        function renderMealTracking() {
+            const container = document.getElementById('mealTracking');
+            container.innerHTML = '';
+            
+            meals.forEach(meal => {
+                const mealDiv = document.createElement('div');
+                mealDiv.className = 'flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0';
+                mealDiv.innerHTML = `
+                    <span class="text-sm font-medium text-gray-700">${meal.label}</span>
+                    <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-1">
+                            <button
+                                onclick="updateSalad('${meal.before}', -1)"
+                                class="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs hover:bg-red-200"
+                            >
+                                -
+                            </button>
+                            <span id="${meal.before}-count" class="w-6 text-center text-sm font-bold text-green-600">0</span>
+                            <button
+                                onclick="updateSalad('${meal.before}', 1)"
+                                class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs hover:bg-green-200"
+                            >
+                                +
+                            </button>
+                        </div>
+                        <span class="text-xs text-gray-500">|</span>
+                        <div class="flex items-center space-x-1">
+                            <button
+                                onclick="updateSalad('${meal.after}', -1)"
+                                class="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs hover:bg-red-200"
+                            >
+                                -
+                            </button>
+                            <span id="${meal.after}-count" class="w-6 text-center text-sm font-bold text-green-600">0</span>
+                            <button
+                                onclick="updateSalad('${meal.after}', 1)"
+                                class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs hover:bg-green-200"
+                            >
+                                +
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(mealDiv);
+            });
+        }
+
+        // Update salad count
+        function updateSalad(meal, increment) {
+            const current = dailyData[currentDate].salads[meal] || 0;
+            dailyData[currentDate].salads[meal] = Math.max(0, current + increment);
+            updateDisplay();
+        }
+
+        // Quick add functions
+        function quickAddSalad(type) {
+            // Add to the most recent meal time based on current time
+            const now = new Date();
+            const hour = now.getHours();
+            
+            let mealTime;
+            if (hour < 10) mealTime = 'breakfast';
+            else if (hour < 12) mealTime = 'morning_snack';
+            else if (hour < 15) mealTime = 'lunch';
+            else if (hour < 18) mealTime = 'afternoon_snack';
+            else if (hour < 21) mealTime = 'dinner';
+            else mealTime = 'evening_snack';
+            
+            const saladKey = mealTime + '_' + type;
+            updateSalad(saladKey, 1);
+        }
+
+        function addNighttimeSalad() {
+            updateSalad('nighttime', 1);
+        }
+
+        // Update pain level
+        function updatePainLevel(level) {
+            dailyData[currentDate].painLevel = parseInt(level);
+            document.getElementById('painLevelText').textContent = `Level: ${level}`;
+            
+            const description = document.getElementById('painDescription');
+            if (level <= 3) {
+                description.innerHTML = '✨ Level 1: Isolated inflammation - 1 cup salads';
+            } else if (level <= 7) {
+                description.innerHTML = '🔥 Level 2: Deeper/burning pain - 2 cup salads';
+            } else {
+                description.innerHTML = '⚡ Level 3: Constant daily inflammation - 3 cup salads';
+            }
+        }
+
+        // Update display
+        function updateDisplay() {
+            const todayData = dailyData[currentDate];
+            if (!todayData) return;
+
+            // Update all meal counts
+            meals.forEach(meal => {
+                const beforeElement = document.getElementById(meal.before + '-count');
+                const afterElement = document.getElementById(meal.after + '-count');
+                if (beforeElement) beforeElement.textContent = todayData.salads[meal.before] || 0;
+                if (afterElement) afterElement.textContent = todayData.salads[meal.after] || 0;
+            });
+
+            // Update nighttime count
+            document.getElementById('nighttime-count').textContent = todayData.salads.nighttime || 0;
+
+            // Update progress circle
+            const totalSalads = Object.values(todayData.salads).reduce((sum, count) => sum + count, 0);
+            const progressPercent = Math.min(100, (totalSalads / 7) * 100);
+            const circumference = 2 * Math.PI * 30;
+            const offset = circumference * (1 - progressPercent / 100);
+            
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+            document.getElementById('progressText').textContent = `${totalSalads}/7`;
+
+            // Show success message if complete
+            const successMessage = document.getElementById('successMessage');
+            if (totalSalads >= 7) {
+                successMessage.classList.remove('hidden');
+            } else {
+                successMessage.classList.add('hidden');
+            }
+        }
+
+        // Save data
+        function saveDailyData() {
+            const notes = document.getElementById('dailyNotes').value;
+            dailyData[currentDate].notes = notes;
+            
+            // Save to localStorage
+            localStorage.setItem('perfect7daily-data', JSON.stringify(dailyData));
+            
+            alert('Daily data saved! 💚');
+        }
+
+        // Load data
+        function loadData() {
+            const saved = localStorage.getItem('perfect7daily-data');
+            if (saved) {
+                dailyData = JSON.parse(saved);
+            }
+        }
+
+        // Date change handler
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            initApp();
+            
+            document.getElementById('currentDate').addEventListener('change', function(e) {
+                currentDate = e.target.value;
+                initializeDayData();
+                updateDisplay();
+                
+                // Load notes for this date
+                const notes = dailyData[currentDate].notes || '';
+                document.getElementById('dailyNotes').value = notes;
+                
+                // Load pain level for this date
+                const painLevel = dailyData[currentDate].painLevel || 5;
+                document.getElementById('painLevel').value = painLevel;
+                updatePainLevel(painLevel);
+            });
+        });
+    </script>
+</body>
+</html>
